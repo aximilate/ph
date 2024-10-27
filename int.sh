@@ -7,8 +7,7 @@ echo "Установка необходимых библиотек..."
 pip3 install pyTelegramBotAPI pynput
 
 echo "Клонирование проекта..."
-git clone https://github.com/aximilate/ph physics.py
-
+git clone https://github.com/aximilate/ph
 # Переход в каталог проекта
 cd ph
 
